@@ -6,8 +6,8 @@ Telegram bot accepts metrics from Oracle OEM (Cloud Control) and send it to tele
 
 # Quick start guide: 
 2. Register your bot in @BotFather, get bot token
-3. Build binary from source (ex for Linux) or  take pre-build binary (send_oem_alert_v.0.2) 
-  env GOOS=linux GOARCH=amd64 go build -o send_oem_alert
+3. Build binary from source (ex for Linux) or  take pre-build binary (send_oem_alert_v.0.2) \
+	env GOOS=linux GOARCH=amd64 go build -o send_oem_alert
 4. Put binary to **some** directory on OEM host
 5. Put your bot token and chatId to config.yml
 6. Config notification rule in OEM (Settings -> Notifications -> Scripts and SNMPv1 Traps -> add OS Commands -> add **some** path to binary to "OS Command" field)
