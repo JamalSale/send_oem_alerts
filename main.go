@@ -3,13 +3,13 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
+	"github.com/kelseyhightower/envconfig"
+	"gopkg.in/yaml.v2"
 	"log"
 	"os"
 	"path/filepath"
 	"sort"
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
-	"github.com/kelseyhightower/envconfig"
-	"gopkg.in/yaml.v2"
 )
 
 const (
@@ -38,6 +38,11 @@ type OemEnv struct {
 	MetricValue          string `envconfig:"VALUE"`
 	IncidentCreationTime string `envconfig:"INCIDENT_CREATION_TIME"`
 	EventReportedTime    string `envconfig:"EVENT_REPORTED_TIME"`
+	JobName              string `envconfig:"SOURCE_OBJ_NAME"`
+	JoOwner              string `envconfig:"SOURCE_OBJ_OWNER"`
+	JoType               string `envconfig:"SOURCE_OBJ_SUB_TYPE"`
+	JobStatus            string `envconfig:"EXECUTION_STATUS"`
+	JobError             string `envconfig:"JOB_ERROR"`
 }
 
 func main() {
@@ -100,11 +105,11 @@ func main() {
 	}
 
 	// debug mode: print message fields
-	if cfg.Telegram.Debug == true {
+	if cfg.Telegram.Debug  {
 		bot.Debug = true
 		log.Println(result)
 		for field, val := range alertMsg {
-			fmt.Println("alertMsg: ", field, val)
+			log.Println("alertMsg: ",field, val)
 		}
 	}
 
@@ -126,3 +131,4 @@ func main() {
 	log.Printf("Authorized on account: %s", bot.Self.UserName)
 
 }
+
