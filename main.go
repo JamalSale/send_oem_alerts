@@ -1,15 +1,11 @@
 package main
 
 import (
-	"encoding/json"
-	"fmt"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
-	"github.com/kelseyhightower/envconfig"
 	"gopkg.in/yaml.v2"
 	"log"
 	"os"
 	"path/filepath"
-	"sort"
 )
 
 const (
@@ -17,7 +13,7 @@ const (
 	parseMode = "html"
 )
 
-type Config struct {
+type config struct {
 	Telegram struct {
 		Token  string `yaml:"token"`
 		ChatID int64  `yaml:"chatID"`
@@ -25,27 +21,8 @@ type Config struct {
 	} `yaml:"telegram"`
 }
 
-// Oracle OEM metric variables from:
-// https://docs.oracle.com/cd/E73210_01/EMADM/GUID-B48F6A84-EE89-498D-94E0-5DE1E7A0CFBC.htm#EMADM9066
-
-type OemEnv struct {
-	Severity             string `envconfig:"SEVERITY"`
-	HostName             string `envconfig:"HOST_NAME"`
-	TargetType           string `envconfig:"TARGET_TYPE"`
-	TargetName           string `envconfig:"TARGET_NAME"`
-	Message              string `envconfig:"MESSAGE"`
-	Metric               string `envconfig:"METRIC_COLUMN"`
-	MetricValue          string `envconfig:"VALUE"`
-	IncidentCreationTime string `envconfig:"INCIDENT_CREATION_TIME"`
-	EventReportedTime    string `envconfig:"EVENT_REPORTED_TIME"`
-	JobName              string `envconfig:"SOURCE_OBJ_NAME"`
-	JoOwner              string `envconfig:"SOURCE_OBJ_OWNER"`
-	JoType               string `envconfig:"SOURCE_OBJ_SUB_TYPE"`
-	JobStatus            string `envconfig:"EXECUTION_STATUS"`
-	JobError             string `envconfig:"JOB_ERROR"`
-}
-
 func main() {
+
 	// read and decode config
 	execPath, err := filepath.Abs(filepath.Dir(os.Args[0]))
 	if err != nil {
@@ -57,45 +34,16 @@ func main() {
 	}
 	defer f.Close()
 
-	var cfg Config
+	var cfg config
 	decoder := yaml.NewDecoder(f)
 	err = decoder.Decode(&cfg)
 	if err != nil {
-		log.Fatal("Unable to unmarshal OemEnv struct ", err)
+		log.Fatal("Unable to decode config parameters ", err)
 	}
 
-	// unmarshal OemEnv struct to alertMsg map
-	oemMsg := &OemEnv{}
-	var alertMsg map[string]string
-	err = envconfig.Process("", oemMsg)
+	result, err := FormatMessage()
 	if err != nil {
-		log.Fatal(err)
-	}
-
-	fields, _ := json.Marshal(oemMsg)
-
-	err = json.Unmarshal(fields, &alertMsg)
-
-	if err != nil {
-		log.Fatal("Unable to unmarshal config ", err)
-	}
-
-	// we need to sort keys for order iteration over map
-	var result string
-	keys := make([]string, 0)
-	for k := range alertMsg {
-		keys = append(keys, k)
-	}
-	sort.Strings(keys)
-
-	for _, k := range keys {
-		// filter out all empty values
-		if len(alertMsg[k]) > 0 {
-			// Convert each key/value pair to string adding html bold tags
-			result += fmt.Sprintf("<b>%s</b> : %s \n", k, alertMsg[k])
-
-		}
-
+		log.Panic(err)
 	}
 
 	// init TgBot
@@ -104,13 +52,13 @@ func main() {
 		log.Panic(err)
 	}
 
-	// debug mode: print message fields
-	if cfg.Telegram.Debug  {
+	// debug mode
+	if cfg.Telegram.Debug {
 		bot.Debug = true
-		log.Println(result)
-		for field, val := range alertMsg {
-			log.Println("alertMsg: ",field, val)
-		}
+		log.Print(result)
+		defer log.Printf("Authorized on account: %s", bot.Self.UserName)
+		defer log.Printf("Message send from: %s ", bot.Self.FirstName)
+
 	}
 
 	// if there is empty messages - dont try to send it
@@ -126,9 +74,5 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	log.Printf("Message send from: %s ", bot.Self.FirstName)
-
-	log.Printf("Authorized on account: %s", bot.Self.UserName)
 
 }
-

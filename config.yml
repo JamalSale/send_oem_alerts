@@ -1,4 +1,1 @@
-telegram:
-  token: "your_bot_token_here"
-  chatID: chat_id
-  debug: false
+
