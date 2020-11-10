@@ -1,5 +1,25 @@
 telegram:
+  enable: true
+  debug: false
   token: "your_bot_token_here"
   chatID: chat_id
-  debug: false
 
+pagerDuty:
+  enable: true
+  debug: false
+  routingKey: "your_pagerDuty_integrationKey_here"
+  apiEndpoint: "https://events.pagerduty.com/v2/enqueue"
+  # message patterns for voice call
+  voiceCallAlertWildcard:
+    - "Agent Unreachable"
+    - "Host is Unreachable"
+
+# custom message metadata
+  clientUrl: "your_oem_url"
+  imagesSrc: "your_image_url"
+  imagesHref: "your_url"
+  imagesAlt: "you_imagesAlt"
+
+
+
+:
