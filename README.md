@@ -1,5 +1,6 @@
 # send_oem_alerts
 Telegram bot accepts metrics from Oracle OEM (Cloud Control) and send it to telegram via env variables.
+Alert messages from OEM also can be redirected to PagerDuty API for Voice Call or other tasks
 
 # Requirements:
  OEM must be 13c+
