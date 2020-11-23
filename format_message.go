@@ -105,6 +105,7 @@ func FormatPagerDutyMessage(oemDataMap map[string]string) (pagerDutyMsg *pagerDu
 	if err != nil {
 		log.Fatal("Unable to processOemEnvVariables ", err)
 	}
+
 	// convert map to json
 	oemDataJson, _ := json.Marshal(oemDataMap)
 
@@ -126,7 +127,7 @@ func FormatPagerDutyMessage(oemDataMap map[string]string) (pagerDutyMsg *pagerDu
 		case "HostName":
 			pagerDutyMsg.Payload.Source = oemMsg.HostName
 		case "Severity":
-			pagerDutyMsg.Payload.Severity = oemMsg.Severity
+			pagerDutyMsg.Payload.Severity = s.ToLower(oemMsg.Severity)
 		case "EventReportedTime":
 			timestamp, _ := time.Parse(layoutISO, oemMsg.EventReportedTime)
 			pagerDutyMsg.Payload.Timestamp = timestamp
